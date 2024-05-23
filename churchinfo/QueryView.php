@@ -258,7 +258,7 @@ function DoQuery()
 			else
 			{
 				//Write the actual value of this row
-				echo "<td>" . $aRow[$iCount] . "&nbsp;</td>";
+				echo "<td>" . $aRow[$iCount] . "</td>";
 			}
 		}
 

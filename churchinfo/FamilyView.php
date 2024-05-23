@@ -216,7 +216,7 @@ elseif ($next_link_text != "") {
 			}
 		echo "</font></div>";
 
-		//Show links to MapQuest, US Post Office, and Google Maps
+		//Show links to MapQuest and Google Maps
 		$bShowUSLinks = false;
 		$bShowMQLink = false;
 		if ($fam_Address1 != "" && $fam_City != "" && $fam_State != "")
@@ -232,26 +232,19 @@ elseif ($next_link_text != "") {
 		}
 
 		if ($bShowUSLinks) {
-			echo "<div align=left><a class=\"SmallText\" target=\"_blank\"
-				href=\"http://www.mapquest.com/maps/map.adp?" .$sMQcountry . 
-				"city=" . urlencode($fam_City) . "&amp;state=" . $fam_State . 
-				"&amp;address=" . urlencode($fam_Address1) . "\">" . gettext("MapQuest") . 
-				"</a></div>";
-				echo "<div align=center><a class=\"SmallText\" target=\"_blank\" 
-				href=\"https://tools.usps.com/go/ZipLookupResultsAction!input.action?address1=" . 
-				urlencode($fam_Address1) . "&amp;city=" . urlencode($fam_City) . 
-				"&amp;state=" . urlencode($fam_State) . "\">" . gettext("USPS") . 
-				"</a></div>";
-				echo "<div align=right><a class=\"SmallText\" target=\"_blank\" 
+			echo "<div align=center><a class=\"SmallText\" target=\"_blank\"
+				href=\"http://www.mapquest.com/search/" . urlencode("$fam_Address1,$fam_City,$fam_State,$sMQcountry") . "\">" . gettext("MapQuest") . 
+				"</a>"
+                . " | " .
+                "<a class=\"SmallText\" target=\"_blank\" 
 				href=\"https://maps.google.com/maps?q=" .
-				urlencode("$fam_Address1,$fam_City,$fam_State") .
-				"\">" . gettext("Google Maps") . "</a></div>";
+				urlencode("$fam_Address1,$fam_City,$fam_State,$sMQcountry") .
+				"\">" . gettext("Google Maps") . "</a>
+                </div>";
 		}
 		if ($bShowMQLink) {
-			echo "<div align=left><a class=\"SmallText\" target=\"_blank\"
-				href=\"http://www.mapquest.com/maps/map.adp?" .$sMQcountry . 
-				"city=" . urlencode($fam_City) . "&amp;state=" . $fam_State . 
-				"&amp;address=" . urlencode($fam_Address1) . "\">" . gettext("MapQuest") . 
+			echo "<div align=center><a class=\"SmallText\" target=\"_blank\"
+				href=\"http://www.mapquest.com/search/" . urlencode("$fam_Address1,$fam_City,$fam_State,$sMQcountry") . "\">" . gettext("MapQuest") . 
 				"</a></div>";
 		}
 		echo "<br>";
@@ -912,9 +905,21 @@ if ($_SESSION['sshowPledges'] || $_SESSION['sshowPayments'])
 	<b><?php echo gettext("Notes:"); ?></b>
 </p>
 
-<p>
+<p style="float:left;padding-right:1em;">
 	<a class="SmallText" href="NoteEditor.php?FamilyID=<?php echo $fam_ID ?>"><?php echo gettext("Add a Note to this Record"); ?></a>
 </p>
+
+<div style="clear:both"></div>
+
+<style>
+	.ShadedBox {white-space: pre-line; 
+    	margin-top: 12px; 
+    	margin-bottom: 3px;
+	}
+	.ShadedBox::first-line {
+    	line-height: 0;
+	}
+</style>
 
 <?php
 
@@ -938,12 +943,10 @@ while($aRow = mysqli_fetch_array($rsNotes))
 		<br>
 	<?php
 	} ?>
-	<a class="SmallText" href="NoteEditor.php?FamilyID=<?php echo $iFamilyID ?>&amp;NoteID=<?php echo $nte_ID ?>"><?php echo gettext("Edit This Note"); ?></a></span>
-	|
-	<a class="SmallText" href="NoteDelete.php?NoteID=<?php echo $nte_ID ?>"><?php echo gettext("Delete This Note"); ?></a>
+      <a class="SmallText" href="NoteEditor.php?FamilyID=<?php echo $iFamilyID ?>&amp;NoteID=<?php echo $nte_ID ?>"><?php echo gettext("Edit This Note"); ?></a></span>
+	  | <a class="SmallText" href="NoteDelete.php?NoteID=<?php echo $nte_ID ?>"><?php echo gettext("Delete This Note"); ?></a>
 
 	<?php
-
 }
 ?>
 <?php } ?>

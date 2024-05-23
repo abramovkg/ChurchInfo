@@ -714,6 +714,73 @@ if ($iMode == 1 || $iMode == 2) {
         <input name="IntersectCart" type="submit" class="icButton" <?php echo 'value="' . gettext("Intersect with Cart") . '"'; ?>>&nbsp;
         <input name="RemoveFromCart" type="submit" class="icButton" <?php echo 'value="' . gettext("Remove from Cart") . '"'; ?>>
 
+<script>
+    // asynchronously add people to cart
+    var itemsTd = document.getElementsByClassName('Search')[3];
+
+    function cartAction(cb){
+        var request = new XMLHttpRequest();
+        request.open('GET', window.location.origin + '/Menu.php?' + (cb.checked ? 'AddToPeopleCart=' : 'RemoveFromPeopleCart=') + cb.value );
+        request.responseType = 'document';
+        request.send();
+        request.onreadystatechange = function(){
+            if(request.readyState === XMLHttpRequest.DONE) {
+                if(request.status === 200) {
+                    itemsTd.innerHTML = request.response.getElementsByClassName('Search')[3].innerHTML;
+                } else {
+                    alert('Issue encountered while adding person to cart');
+                }
+            }
+        }
+    }
+
+    //back to top button with smooth scrolling
+    var backTopAppearAt = 500;
+
+    jQuery('body').prepend('<a href="#top" class="back-to-top">^</a>');
+
+    jQuery(window).scroll(function() {
+                          if (jQuery(window).scrollTop() > backTopAppearAt) {
+                          jQuery('.back-to-top').fadeIn('slow');
+                          } else {
+                          jQuery('.back-to-top').fadeOut('slow');
+                          }
+                          });
+
+    jQuery('.back-to-top, #back-top').click(function() {
+                                            jQuery('html').animate({ scrollTop: 0 }, 500);
+                                            return false;
+                                            });
+</script>
+<style>
+    .back-to-top {
+        display: none;
+        margin-right: auto;
+        margin-left: auto;
+        text-align: center;
+        position: fixed;
+        bottom: 20px;
+        right: 0;
+        left: 0;
+        width: 30px;
+        padding: 10px 15px;
+        background-color: rgba(241, 230, 202, 0.55);
+        border-radius: 4px;
+        border: solid 1px lightgray;
+        z-index: 2;
+    }
+    .back-to-top,
+    .back-to-top:hover,
+    .back-to-top:active {
+        text-decoration: none;
+    }
+    @media (max-width: 500px) {
+        .cbl {
+            padding: .25em;
+        }
+    }
+</style>
+
         </td></tr>
 		</table></form>
         <?php
@@ -726,9 +793,9 @@ if ($iMode == 1 || $iMode == 2) {
 		while ($aLetter = mysqli_fetch_row($rsLetters)) {
 			$aLetter[0] = mb_strtoupper($aLetter[0]);
 			if ($aLetter[0] == $sLetter) {
-				echo "&nbsp;&nbsp;|&nbsp;&nbsp;" . $aLetter[0];
+				echo " &nbsp;|&nbsp; " . $aLetter[0];
 			} else {
-				echo "&nbsp;&nbsp;|&nbsp;&nbsp;<a href=\"SelectList.php?mode=$sMode&amp;type=$iGroupTypeMissing&amp;Filter=$sFilter&amp;Classification=$iClassificationStr&amp;FamilyRole=$iFamilyRoleStr&amp;Gender=$iGenderStr&amp;grouptype=$iGroupTypeStr&amp;groupid=$iGroupIDStr&amp;grouproleid=$iRoleIDStr";
+				echo " &nbsp;|&nbsp; <a href=\"SelectList.php?mode=$sMode&amp;type=$iGroupTypeMissing&amp;Filter=$sFilter&amp;Classification=$iClassificationStr&amp;FamilyRole=$iFamilyRoleStr&amp;Gender=$iGenderStr&amp;grouptype=$iGroupTypeStr&amp;groupid=$iGroupIDStr&amp;grouproleid=$iRoleIDStr";
 				if($sSort) echo "&amp;Sort=$sSort";
 				echo "&amp;Letter=" . $aLetter[0] . "\">" . $aLetter[0] . "</a>";
 			}
@@ -911,8 +978,9 @@ if ($iMode == 1 || $iMode == 2) {
 		echo '<table cellpadding="4" align="center" cellspacing="0" width="100%">';
 		echo '<tr class="TableHeader">';
 
-		if ($_SESSION['bEditRecords']) 
-		    echo '<td width="25">' . gettext("Edit") . '</td>';
+		if ($_SESSION['bEditRecords'])  {  
+	    echo '<td width="25">' . gettext("Edit") . '</td>'; }
+	    else { echo '<td style="padding:0;"></td>'; }
 
 		echo '<td><a href="SelectList.php?mode=' .$sMode. '&amp;type=' .$iGroupTypeMissing;
 		echo '&amp;Sort=name&amp;Filter=' .$sFilter. '">' . gettext("Name") . '</a></td>';
@@ -1038,8 +1106,8 @@ if ($iMode == 1 || $iMode == 2) {
     		echo "<tr class=\"" .$sRowClass. "\">";
 			if ($_SESSION['bEditRecords']) {
 				echo "<td><a href=\"PersonEditor.php?PersonID=" .$per_ID. "\">";
-				echo gettext("Edit") . "</a></td>";
-			}
+				echo gettext("Edit") . "</a></td>";	} 
+			else { echo '<td style="padding:0;"></td>'; }
 
 			echo "<td><a href=\"PersonView.php?PersonID=" .$per_ID. "\">";
 			echo FormatFullName($per_Title, $per_FirstName, $per_MiddleName, 
@@ -1089,32 +1157,13 @@ if ($iMode == 1 || $iMode == 2) {
 			echo "<td>";
 			if (!isset($_SESSION['aPeopleCart']) || !in_array($per_ID, $_SESSION['aPeopleCart'], false)) {
 
-				// Add to cart option
-				if (mb_substr($sRedirect, -1, 1) == '?')
-					echo "<a onclick=\"saveScrollCoordinates()\"
-							href=\"" .$sRedirect. "AddToPeopleCart=" .$per_ID. "\">";
-				elseif (mb_substr($sRedirect, -1, 1) == '&')
-					echo "<a onclick=\"saveScrollCoordinates()\"
-							href=\"" .$sRedirect. "AddToPeopleCart=" .$per_ID. "\">";
-				else
-					echo "<a onclick=\"saveScrollCoordinates()\" 
-							href=\"" .$sRedirect. "&amp;AddToPeopleCart=" .$per_ID. "\">";
-
-				echo gettext("Add to Cart") . "</a>";
-			} else {
-				// Remove from cart option
-				if (mb_substr($sRedirect, -1, 1) == '?')
-					echo "<a onclick=\"saveScrollCoordinates()\" 
-							href=\"" .$sRedirect. "RemoveFromPeopleCart=" .$per_ID. "\">";
-				elseif (mb_substr($sRedirect, -1, 1) == '&')
-					echo "<a onclick=\"saveScrollCoordinates()\"
-							href=\"" .$sRedirect. "RemoveFromPeopleCart=" .$per_ID. "\">";
-				else
-					echo "<a onclick=\"saveScrollCoordinates()\"
-							href=\"" .$sRedirect. "&amp;RemoveFromPeopleCart=" .$per_ID. "\">";
-
-				echo gettext("Remove") . "</a>";
-			}
+                // Add to cart option
+                echo "<label class=\"cbl\"><input type=\"checkbox\" value=".$per_ID." class=\"cb\" onclick=\"cartAction(this);\"></label>";
+            } else {
+                // Remove from cart option
+                echo "<label class=\"cbl\"><input type=\"checkbox\" checked=\"checked\" value=".$per_ID." class=\"cb\" onclick=\"cartAction(this);\"></label>";
+            }
+            echo "</td>";
 
 			if ($iMode == 1) {
 				echo "<td><a href=\"VCardCreate.php?PersonID=" .$per_ID. "\">";
@@ -1323,7 +1372,7 @@ if ($iMode == 1 || $iMode == 2) {
     echo "<div align=\"center\">";
     echo "<a href=\"SelectList.php?mode=family\">" . gettext("View All") . "</a>";
     while ($aLetter = mysqli_fetch_array($rsLetters)) {
-        echo "&nbsp;&nbsp;|&nbsp;&nbsp;<a href=\"SelectList.php?mode=family";
+        echo " &nbsp;|&nbsp; <a href=\"SelectList.php?mode=family";
         if($sSort) echo "&amp;Sort=$sSort";
             echo "&amp;Letter=" . $aLetter[0] . "\">" . $aLetter[0] . "</a>";
     }

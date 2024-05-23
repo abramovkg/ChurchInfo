@@ -56,5 +56,42 @@ if ($_SESSION['iLoginCount'] == 0) {
 
 }
 
+    
+    echo '
+    <style>
+    .quicklinks-container {
+    display: table-cell;
+    border: solid gray 1px;
+    }
+    .quicklinks-subcontainer {
+        float: left;
+    padding: .5em;
+    }
+    .quicklink {
+    padding: .5em;
+    }
+    .qlindent1 {
+        padding-left: 2em;
+    }
+    </style>
+    <b>Quick Links:</b>
+    <div class="quicklinks-container">
+        <div class="quicklinks-subcontainer">
+            <div class="quicklink"><a href="SelectList.php?mode=person&Classification=1&Number=1000">Members</a></div>
+            <div class="quicklink"><a href="SelectList.php?mode=family&Number=500">Families</a></div>
+            <div class="quicklink"><a href="GroupList.php">Groups</a></div>
+            <div class="quicklink"><a href="ListEvents.php">Events</a></div>
+            <div class="quicklink"><a href="EventNames.php">Add Event</a></div>
+        </div>
+        <div class="quicklinks-subcontainer">
+            <div class="quicklink"><a href="QueryList.php">Queries:</a></div>
+            <div class="quicklink qlindent1"><a href="QueryView.php?QueryID=15">Advanced Search</a></div>
+            <div class="quicklink qlindent1"><a href="QueryView.php?QueryID=25">Volunteer Search</a></div>
+        </div>
+    </div>
+    <div><br><a href="https://icons8.com">Icon pack by Icons8</a></div>
+    ';
+    
+    
 require 'Include/Footer.php';
 ?>

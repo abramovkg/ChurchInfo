@@ -35,7 +35,7 @@ if (array_key_exists ("Action", $_GET))
 else 
 	$iAction = 0; 
 
-$sAction = FilterInput($_GET{"Action"}); 
+$sAction = FilterInput($_GET["Action"]); 
 
 $sClass = "";
 $sNameError = "";

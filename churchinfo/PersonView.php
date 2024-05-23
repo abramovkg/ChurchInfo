@@ -268,7 +268,7 @@ gettext("List View") . "</a> ";
 		$sState = strip_tags($sState);
 		$sCountry = strip_tags($sCountry);
 
-		//Show link to mapquest
+		//Show links to mapquest and google maps
 		$bShowMQLink = false;
 		if ($sAddress1 != "" && $sCity != "" && $sState != "")
 		{
@@ -285,7 +285,15 @@ gettext("List View") . "</a> ";
 		}
 
 		if ($bShowMQLink)
-			echo "<div align=\"right\"><a class=\"SmallText\" target=\"_blank\" href=\"http://www.mapquest.com/maps/map.adp?" .$sMQcountry . "city=" . urlencode($sCity) . "&state=" . $sState . "&address=" . urlencode($sAddress1) . "\">" . gettext("View Map") . "</a></div>";
+			echo "<div align=center><a class=\"SmallText\" target=\"_blank\"
+				href=\"http://www.mapquest.com/search/" . urlencode("$sAddress1,$sCity,$sState,$sMQcountry") . "\">" . gettext("MapQuest") . 
+				"</a>"
+                . " | " .
+                "<a class=\"SmallText\" target=\"_blank\" 
+				href=\"https://maps.google.com/maps?q=" .
+				urlencode("$sAddress1,$sCity,$sState,$sMQcountry") .
+				"\">" . gettext("Google Maps") . "</a>
+                </div>";      
 
 		echo "<br>";
 
@@ -484,15 +492,19 @@ gettext("List View") . "</a> ";
 				// Display the right-side custom fields
 				while ($Row = mysqli_fetch_array($rsRightCustomFields)) {
 					extract($Row);
-					$currentData = trim($aCustomData[$custom_Field]);
-					$custom_Special = "";
-					if ($type_ID == 11) $custom_Special = $sPhoneCountry;
-					echo "<tr><td class=\"TinyLabelColumn\">" . $custom_Name . "</td>";
-					echo "<td><div  class='TDscroll' id='customrow'>";
-					echo nl2br((displayCustomField($type_ID, $currentData, $custom_Special)));
-					echo "</div></td></tr>";
-//					echo "<td class=\"TinyTextColumn\">" . displayCustomField($type_ID, $currentData, $custom_Special) . "</td></tr>";
-				}
+					if (($aSecurityType[$custom_FieldSec] == 'bAll') or ($_SESSION[$aSecurityType[$custom_FieldSec]]))
+					{
+					    $currentData = "";
+					    if (array_key_exists ($custom_Field, $aCustomData) && (! is_null($aCustomData[$custom_Field])))
+					        $currentData = trim($aCustomData[$custom_Field]);
+						if ($type_ID == 11) $custom_Special = $sPhoneCountry;
+						echo "<tr><td class=\"TinyLabelColumn\">" . $custom_Name . "</td>";
+						echo "<td><div  class='TDscroll' id='customrow'>";
+						echo nl2br((displayCustomField($type_ID, $currentData, $custom_Special)));
+						echo "</div></td></tr>";						
+//						echo "<td class=\"TinyTextColumn\">" . displayCustomField($type_ID, $currentData, $custom_Special) . "</td></tr>";
+					}
+                }
 			?>
 			</table>
 		</td>
@@ -865,15 +877,33 @@ if ($per_DateLastEdited && strlen($per_DateLastEdited) > 0)
 
 
 <?php if ($_SESSION['bNotes']) { ?>
-<p>
-	<b><?php echo gettext("Notes:"); ?></b>
-</p>
+<div class="notes">
+  <p><b><?php echo gettext("Notes:"); ?></b></p>
 
-<p>
-	<a class="SmallText" href="WhyCameEditor.php?PersonID=<?php echo $per_ID ?>"><?php echo gettext("Edit \"Why Came\" Notes"); ?></a></font>
-	<br>
-	<a class="SmallText" href="NoteEditor.php?PersonID=<?php echo $per_ID ?>"><?php echo gettext("Add a Note to this Record"); ?></a></font>
-</p>
+  <p class="note-links">
+    <a class="SmallText" href="WhyCameEditor.php?PersonID=<?php echo $per_ID ?>"><?php echo gettext("Edit \"Why Came\" Notes"); ?></a>
+    <a class="SmallText" href="NoteEditor.php?PersonID=<?php echo $per_ID ?>"><?php echo gettext("Add a Note to this Record"); ?></a>
+    <a class="SmallText" href="NoteEditorVisit.php?PersonID=<?php echo $per_ID ?>"><?php echo gettext("Add a Contact/Visit Note to this Record"); ?></a>
+  </p>
+
+<style>
+  .note-links a {
+      display: block; 
+      padding:0.5em;
+  }
+  .notes {
+      max-width: 95%; 
+      text-align: left;}
+  .ShadedBox {
+      white-space: pre-line; 
+      margin-top: 12px; 
+      margin-bottom: 3px;
+  }
+  .ShadedBox::first-line {
+      line-height: 0;
+  }
+</style>
+
 
 <?php
 
@@ -883,7 +913,7 @@ while($aRow = mysqli_fetch_array($rsNotes))
 	extract($aRow);
 	?>
 
-	<p class="ShadedBox")>
+	<p class="ShadedBox">
 		<?php echo $nte_Text ?>
 	</p>
 	<span class="SmallText"><?php echo gettext("Entered:") . ' ' . FormatDate($nte_DateEntered,True) . ' ' . gettext("by") . ' ' . $EnteredFirstName . " " . $EnteredLastName ?></span>
@@ -896,11 +926,17 @@ while($aRow = mysqli_fetch_array($rsNotes))
 		<br>
 	<?php
 	}
-	if ($_SESSION['bNotes']) { ?><a class="SmallText" href="NoteEditor.php?PersonID=<?php echo $iPersonID ?>&NoteID=<?php echo $nte_ID ?>"><?php echo gettext("Edit This Note"); ?></a>&nbsp;|&nbsp;<?php }
-	if ($_SESSION['bNotes']) { ?><a class="SmallText" href="NoteDelete.php?NoteID=<?php echo $nte_ID ?>"><?php echo gettext("Delete This Note"); ?></a> <?php }
-
+    if ($_SESSION['bNotes']) { ?>
+      <a class="SmallText" href="NoteEditor.php?PersonID=<?php echo $iPersonID ?>&NoteID=<?php echo $nte_ID ?>"><?php echo gettext("Edit as Note"); ?></a> 
+      | <a class="SmallText" href="NoteEditorVisit.php?PersonID=<?php echo $iPersonID ?>&NoteID=<?php echo $nte_ID ?>"><?php echo gettext("Edit as Contact/Visit Note"); ?></a> | <?php 
+    }
+    if ($_SESSION['bNotes']) { ?> 
+      <a class="SmallText" href="NoteDelete.php?NoteID=<?php echo $nte_ID ?>"><?php echo gettext("Delete This Note"); ?></a> <?php 
+    }
+                
 }
 ?>
+</div>
 <?php }
 
 require "Include/Footer.php";
